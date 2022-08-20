@@ -14,7 +14,8 @@ def isCommand(CommandName, i, lista, variables, keywords, funciones):
         if is_Type(variables, lista[i+1], "numero"):
             termina_en = i+1
             correcto = True
-        
+
+#Hola
 
 def tokenizer(filename):
     """
