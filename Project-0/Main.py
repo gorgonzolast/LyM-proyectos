@@ -1,19 +1,70 @@
-def init_Keywords()->list:
-    keywords = ["walk","jump","jumpTo","veer","look","drop","grab","get","free","pop","if","else","while","do","(",")","{","}","isfacing","isValid","canWalk","not"]
+def initilizeKeyWords()->list:
+    keywords = ["walk", "jump", "jumpTo", "veer", "look", "drop", "grab", "get", "free", "pop", "if", "else", "while", "do", "(", ")", "{", "}", "isfacing", "isValid", "canWalk", "not"]
     return keywords
 
-def isCommand(CommandName, i, lista, variables, keywords, funciones):
+def initializeVariables()->dict:
+    variables = {}
+    return variables
+
+def initializeProcedures()->dict:
+    procedures = {}
+    return procedures
+
+def getValue(variables, name):
+    return variables[name]
+
+def existVariable(variables, name):
+    return name in variables
+
+def isType(variables, text, type):
+    confirmation = False
+    if type == "integer":
+        if text.isdigit() or (existVariable(variables, text) and (getValue(variables, text).isdigit() or getValue(variables, text) == None)):
+            confirmation = True
+    elif type == "direction":
+        directions = ["N","S","W","E"]
+        if text in directions or (existVariable(variables, text) and (getValue(variables, text).isdigit() or getValue(variables, text) == None)):
+            confirmation = True
+    elif type == "turn":
+        turnInto = ["left","right","around"]
+        if text in turnInto:
+            confirmation = True
+    elif type == "position":
+        positions = ["front","back","left","right"]
+        if text in positions:
+            confirmation = True
+            
+    return confirmation
+
+def iterateThruList(tokens, variables, keywords, procedures):
+    isOK = True
+    newCommand = True
+    stop = False
+    pos = 0
+
+    if not (tokens[0] == "PROG" and tokens[-1] == "PROG"):
+        isOK = False
+
+    while n < len(tokens) and isOK and not stop:
+        if newCommand:
+            isOK, finishesAt = isCommand(tokens[pos], pos, tokens, variables, keywords, procedures)
+        n += 1
+
+    return isOK, pos 
+
+
+def isCommand(commandName, i, lista, variables, keywords, funciones):
     "Verifica si el comando es correcto y regresa en qué parte de la lista termina este comando"
 
-    correcto = False
-    termina_en = i
+    flag = False
+    finishesAt = i
 
-    commonKw = ["jump","drop","grab","get","free","pop"]
-    if CommandName in commonKw:
+    commonKW = ["jump", "drop", "grab", "get", "free", "pop"]
+    if commandName in commonKW:
         #print("T1. lista[i="+str(i)+"] " +lista[i])
-        if is_Type(variables, lista[i+1], "numero"):
-            termina_en = i+1
-            correcto = True
+        if isType(variables, lista[i+1], "integer"):
+            finishesAt = i+1
+            flag = True
 
 #Hola
 
@@ -77,9 +128,9 @@ def addWord(word, words):
 
 def startProgram():
 
-    #variables = init_Variables()
-    keywords = init_Keywords()
-    #funciones = init_Funciones()
+    variables = initializeVariables()
+    keywords = initilizeKeyWords()
+    procedures = initializeProcedures()
 
     filename = input("Introduce the name of the textfile ")
     if ".txt" != filename[-4:]:
