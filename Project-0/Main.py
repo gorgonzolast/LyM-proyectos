@@ -40,15 +40,19 @@ def iterateThruList(tokens, variables, keywords, procedures):
     isOK = True
     newCommand = True
     stop = False
-    pos = 0
+    pos = 1
 
-    if not (tokens[0] == "PROG" and tokens[-1] == "PROG"):
+    if not (tokens[0] == "PROG" and tokens[-1] == "GORP"):
         isOK = False
 
-    while n < len(tokens) and isOK and not stop:
-        if newCommand:
+    while pos < len(tokens) - 1 and isOK and not stop:
+        if tokens[pos] == "newline":
+            newCommand = True
+
+        elif newCommand:
             isOK, finishesAt = isCommand(tokens[pos], pos, tokens, variables, keywords, procedures)
-        n += 1
+            pos = finishesAt
+        pos += 1
 
     return isOK, pos 
 
@@ -60,13 +64,19 @@ def isCommand(commandName, i, lista, variables, keywords, funciones):
     finishesAt = i
 
     commonKW = ["jump", "drop", "grab", "get", "free", "pop"]
+    print(commandName)
     if commandName in commonKW:
-        #print("T1. lista[i="+str(i)+"] " +lista[i])
-        if isType(variables, lista[i+1], "integer"):
-            finishesAt = i+1
+        if isType(variables, lista[i+2], "integer") and lista[i+1] == "(" and lista[i+3] == ")":
+            finishesAt = i+3
+            print(lista[i+3])
             flag = True
+    elif commandName == "var":
+        if type(lista[i+1][0]) is float:
+            
+            addVariables(variables,lista[i+1],lista[i+2],funciones)
 
-#Hola
+    
+    return flag, finishesAt
 
 def tokenizer(filename):
     """
@@ -137,7 +147,7 @@ def startProgram():
         filename += ".txt"
     tokens = tokenizer(filename)
 
-    resultado, _ = iterateThruList(tokens, keywords, funciones)
+    resultado, _ = iterateThruList(tokens, variables, keywords, procedures)
     if resultado:
         print("The syntax is CORRECT.")
     else:
