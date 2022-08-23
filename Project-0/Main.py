@@ -68,14 +68,19 @@ def isCommand(commandName, i, lista, variables, keywords, funciones):
     if commandName in commonKW:
         if isType(variables, lista[i+2], "integer") and lista[i+1] == "(" and lista[i+3] == ")":
             finishesAt = i+3
-            print(lista[i+3])
             flag = True
+    elif commandName == "veer":
+        if isType(variables, lista[i+2], "turn") and lista[i+1] == "(" and lista[i+3] == ")":
+            finishesAt = i+3
+            flag = True
+    elif commandName == "PROC":
+        if lista[i+2]                  
+    """        
     elif commandName == "var":
         if type(lista[i+1][0]) is float:
             
             addVariables(variables,lista[i+1],lista[i+2],funciones)
-
-    
+    """    
     return flag, finishesAt
 
 def tokenizer(filename):
