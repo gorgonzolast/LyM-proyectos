@@ -10,11 +10,19 @@ def initializeProcedures()->dict:
     procedures = {}
     return procedures
 
+def initializeConditions()->list:
+    conditions = ["isfacing","isValid","canWalk","not"]
+    return conditions
+
 def getValue(variables, name):
     return variables[name]
 
 def existVariable(variables, name):
     return name in variables
+
+def addProcedure(procedures, procedure, parameters):
+    procedures[procedure] = parameters
+
 
 def isType(variables, text, type):
     confirmation = False
@@ -22,7 +30,7 @@ def isType(variables, text, type):
         if text.isdigit() or (existVariable(variables, text) and (getValue(variables, text).isdigit() or getValue(variables, text) == None)):
             confirmation = True
     elif type == "direction":
-        directions = ["N","S","W","E"]
+        directions = ["north","south","west","east"]
         if text in directions or (existVariable(variables, text) and (getValue(variables, text).isdigit() or getValue(variables, text) == None)):
             confirmation = True
     elif type == "turn":
@@ -62,26 +70,93 @@ def isCommand(commandName, i, lista, variables, keywords, funciones):
 
     flag = False
     finishesAt = i
-
+    m = 1
     commonKW = ["jump", "drop", "grab", "get", "free", "pop"]
+
+    chars = ["a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","o","p","q","r","s","t","v","w","x","y","z"]
     print(commandName)
-    if commandName in commonKW:
+    if commandName in commonKW or (commandName == "walk" and isType(variables, lista[i+2], "integer") and lista[i+1] == "(" and lista[i+3] == ")"):
         if isType(variables, lista[i+2], "integer") and lista[i+1] == "(" and lista[i+3] == ")":
             finishesAt = i+3
+            print(lista[i+3])
             flag = True
+    
+    elif commandName == "walk" and lista[i+1] == "(" and lista[i+5] == ")" and lista[i+3] == "," and isType(variables, lista[i+4], "integer"):
+        if isType(variables, lista[i+2], "position"):
+            finishesAt = i+5
+            print(lista[i+5])
+            flag = True
+
+        elif isType(variables, lista[i+2], "direction"):
+            finishesAt = i+5
+            print(lista[i+5])
+            flag = True
+
+    elif commandName == "jumpTo":
+        if isType(variables, lista[i+2], "integer") and lista[i+3] == "," and isType(variables, lista[i+4], "integer") and lista[i+1] == "(" and lista[i+5] == ")":
+            finishesAt = i+5
+            print(lista[i+5])
+            flag = True
+
+    elif commandName == "look":
+        if isType(variables, lista[i+2], "direction") and lista[i+1] == "(" and lista[i+3] == ")":
+            finishesAt = i+3
+            print(lista[i+3])
+            flag = True
+
+    elif commandName == "var":
+        while lista[i+m] != "newline":
+            if ((lista[i+m])[0]) in chars:
+                addVariable(lista[i+m],variables,0,funciones)
+                m += 1
+            elif lista[i+m] == ",":
+                m += 1
+            elif lista[i+m] == ";":
+                m += 1
+                flag = True
+        finishesAt = i + m
+    
+    elif commandName in variables.keys() and lista[i+1] == "=" and lista[i+3] == ";":
+        variables[commandName] = lista[i+2]
+        finishesAt = i+3
+        flag = True
+    
     elif commandName == "veer":
         if isType(variables, lista[i+2], "turn") and lista[i+1] == "(" and lista[i+3] == ")":
             finishesAt = i+3
             flag = True
+
     elif commandName == "PROC":
-        if lista[i+2]                  
-    """        
-    elif commandName == "var":
-        if type(lista[i+1][0]) is float:
-            
-            addVariables(variables,lista[i+1],lista[i+2],funciones)
-    """    
+        presumedPositions = []
+        if lista[i + 2] == "(":
+            aux = i + 3
+            while lista[aux] != "newline":
+                if lista[aux] == ",":
+                    presumedPositions.append(aux - 1)
+                aux += 1
+            if lista[aux] == ")":
+                presumedParams = []
+                mark = 0
+                while mark < len(presumedPositions):
+                    presumedParams.append(presumedPositions[mark])
+                    mark += 1
+                presumedParams.append(presumedPositions[mark + 1])
+                try:
+                    addProcedure(funciones, lista[i+1] , presumedParams)
+                except:
+                    isOk = False
+
+
+
+                    
+
+
+
+
     return flag, finishesAt
+
+    
+
 
 def tokenizer(filename):
     """
@@ -126,6 +201,21 @@ def tokenizer(filename):
                 words.append("newline")
                 word = ""
 
+            elif char == ",":
+                addWord(word,words)
+                words.append(",")
+                word = ""
+
+            elif char == ";":
+                addWord(word,words)
+                words.append(";")
+                word = ""
+            
+            elif char == "=":
+                addWord(word,words)
+                words.append("=")
+                word = ""
+
             else:
                 word += char
 
@@ -141,6 +231,11 @@ def addWord(word, words):
     if word != "":
         words.append(word)
 
+def addVariable(var,allVariables,value,procedures):
+    procedures.pop(var,None)
+    allVariables[var] = value
+    
+
 def startProgram():
 
     variables = initializeVariables()
@@ -153,6 +248,8 @@ def startProgram():
     tokens = tokenizer(filename)
 
     resultado, _ = iterateThruList(tokens, variables, keywords, procedures)
+    print(tokens)
+    print(variables)
     if resultado:
         print("The syntax is CORRECT.")
     else:
